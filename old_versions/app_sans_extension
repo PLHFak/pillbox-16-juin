@@ -1,0 +1,75 @@
+cat > app.py << 'EOF' from flask import Flask, request, jsonify, 
+render_template_string import datetime import os app = Flask(__name__)
+# Stockage simple en mémoire pour commencer
+events = [] @app.route('/') def home(): print(f"[DEBUG] Page d'accueil visitée - 
+    {len(events)} événements") return """ <h1>Moniteur de Pilulier</h1> <p>Statut: 
+    En ligne ✅</p> <p>Derniers événements:</p> <ul> """ + 
+    "".join([f"<li>{e}</li>" for e in events[-10:]]) + """ </ul> <p>Debug: """ + 
+    str(len(events)) + """ événements total</p> <p><small>Dernière mise à jour: 
+    """ + str(datetime.datetime.now()) + """</small></p> """
+@app.route('/webhook/pillbox', methods=['POST', 'GET']) def pillbox_webhook(): 
+    print(f"\n{'='*50}") print(f"[DEBUG] Webhook reçu à 
+    {datetime.datetime.now()}") print(f"[DEBUG] Méthode: {request.method}") 
+    print(f"[DEBUG] Headers: {dict(request.headers)}")
+    
+    # Essayons plusieurs méthodes pour récupérer les données
+    data = None try:
+        # Méthode 1: JSON
+        data = request.get_json(force=True) print(f"[DEBUG] JSON data: {data}") 
+    except:
+        print(f"[DEBUG] Pas de JSON valide")
+    
+    # Méthode 2: Form data
+    form_data = request.form.to_dict() if form_data: print(f"[DEBUG] Form data: 
+        {form_data}")
+    
+    # Méthode 3: Raw data
+    raw_data = request.get_data(as_text=True) print(f"[DEBUG] Raw data: 
+    '{raw_data}'") print(f"[DEBUG] Raw data length: {len(raw_data)}")
+    
+    # Méthode 4: Args dans l'URL
+    args = request.args.to_dict() if args: print(f"[DEBUG] URL args: {args}")
+    
+    # Essayons de déterminer le statut
+    status = "unknown"
+    
+    # Si on a des données JSON
+    if data and isinstance(data, dict):
+        # Cherchons dans différents champs possibles
+        status = data.get('value', data.get('status', data.get('state', 
+                         data.get('params', {}).get('switch', 'unknown'))))
+        print(f"[DEBUG] Status trouvé dans JSON: {status}")
+    
+    # Si c'est dans le form data
+    elif form_data: status = form_data.get('value', form_data.get('status', 
+        'unknown')) print(f"[DEBUG] Status trouvé dans form: {status}")
+    
+    # Si c'est dans l'URL
+    elif args: status = args.get('value', args.get('status', 'unknown')) 
+        print(f"[DEBUG] Status trouvé dans args: {status}")
+    
+    # Si on trouve "open" ou "close" dans les données brutes
+    elif raw_data: if 'open' in raw_data.lower(): status = 'opened' elif 'close' 
+        in raw_data.lower():
+            status = 'closed'
+    
+    # Créer l'événement avec plus de détails
+    event = f"{datetime.datetime.now().strftime('%H:%M:%S')} - Pilulier {status}" 
+    if raw_data and len(raw_data) < 100:
+        event += f" (raw: {raw_data})"
+    
+    events.append(event) print(f"[DEBUG] Événement ajouté: {event}") 
+    print(f"{'='*50}\n")
+    
+    return jsonify({"success": True, "message": f"Reçu: {status}"}) 
+@app.route('/test') def test():
+    """Page de test pour vérifier que l'app fonctionne""" return """ <h1>Page de 
+    test</h1> <p>L'application fonctionne !</p> <p><a href="/">Retour à 
+    l'accueil</a></p> """
+if __name__ == '__main__': print("\n" + "="*50) print("DÉMARRAGE DE L'APPLICATION 
+    MONITEUR DE PILULIER") print("="*50) print(f"Heure de démarrage: 
+    {datetime.datetime.now()}") print(f"URL locale: http://127.0.0.1:8000") 
+    print(f"URL publique: http://51.44.12.162:8000") print("="*50 + "\n")
+    
+    app.run(host='0.0.0.0', port=8000, debug=True)
+EOF

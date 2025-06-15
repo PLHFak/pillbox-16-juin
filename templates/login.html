@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion - Pillbox Monitor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto 40px;
+        }
+        .user-info-table {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .user-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .webhook-code {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-buttons">
+        <a href="/" class="btn btn-success">
+            <i class="fas fa-home"></i> Homepage
+        </a>
+        <a href="/supervision" class="btn btn-info">
+            <i class="fas fa-chart-line"></i> Supervision
+        </a>
+    </div>
+
+    <div class="login-container">
+        <div class="text-center mb-4">
+            <h1><i class="fas fa-pills"></i> Moniteur de Pilulier</h1>
+        </div>
+
+        <div class="login-form">
+            <h3 class="text-center mb-4">Connexion</h3>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    <input type="text" name="username" class="form-control" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+        </div>
+
+        <div class="user-info-table">
+            <h4 class="text-center mb-3">
+                <i class="fas fa-users"></i> Utilisateurs disponibles
+            </h4>
+            
+            <div class="row">
+                <!-- Admin -->
+                <div class="col-md-4">
+                    <div class="user-card">
+                        <h5><i class="fas fa-user-shield"></i> Admin</h5>
+                        <p class="mb-1"><strong>Login:</strong> admin</p>
+                        <p class="mb-1"><strong>Pass:</strong> admin123</p>
+                        <p class="mb-1"><strong>ID:</strong> 1</p>
+                        <p class="mb-1"><strong>Prises/jour:</strong> 2</p>
+                        <div class="mt-2">
+                            <small class="text-muted">Webhooks IFTTT:</small><br>
+                            <span class="webhook-code">opened_1</span>
+                            <span class="webhook-code">closed_1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marie -->
+                <div class="col-md-4">
+                    <div class="user-card">
+                        <h5><i class="fas fa-user"></i> Marie</h5>
+                        <p class="mb-1"><strong>Login:</strong> marie</p>
+                        <p class="mb-1"><strong>Pass:</strong> marie123</p>
+                        <p class="mb-1"><strong>ID:</strong> 2</p>
+                        <p class="mb-1"><strong>Prises/jour:</strong> 3</p>
+                        <div class="mt-2">
+                            <small class="text-muted">Webhooks IFTTT:</small><br>
+                            <span class="webhook-code">opened_2</span>
+                            <span class="webhook-code">closed_2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pierre -->
+                <div class="col-md-4">
+                    <div class="user-card">
+                        <h5><i class="fas fa-user"></i> Pierre</h5>
+                        <p class="mb-1"><strong>Login:</strong> pierre</p>
+                        <p class="mb-1"><strong>Pass:</strong> pierre123</p>
+                        <p class="mb-1"><strong>ID:</strong> 3</p>
+                        <p class="mb-1"><strong>Prises/jour:</strong> 1</p>
+                        <div class="mt-2">
+                            <small class="text-muted">Webhooks IFTTT:</small><br>
+                            <span class="webhook-code">opened_3</span>
+                            <span class="webhook-code">closed_3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3 text-center">
+                <i class="fas fa-info-circle"></i> 
+                Dans IFTTT, utilisez {"value": "opened_X"} et {"value": "closed_X"}
+                <br>
+                <small>URL webhook : http://51.44.12.162:8000/webhook/pillbox</small>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

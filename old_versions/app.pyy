@@ -1,0 +1,41 @@
+from flask import Flask, request, jsonify, render_template_stringimport datetime 
+import os import datetime app = Flask(__name__) import os
+# Stockage simple en mémoire pour commencer
+app = Flask(__name__)events = []
+
+@app.route('/') def home():
+# Stockage simple en mémoire pour commencer return """
+events = [] <h1>Moniteur de Pilulier</h1> <p>Statut: En ligne ✅</p> <p>Derniers 
+    événements:</p> <ul> """ + "".join([f"<li>{e}</li>" for e in events[-5:]]) + 
+    """ </ul> """
+
+@app.route('/webhook/pillbox', methods=['POST']) def pillbox_webhook(): 
+@app.route('/') data = request.json def home(): status = data.get('value', 
+'unknown')
+    print(f"[DEBUG] Page d'accueil visitée - {len(events)} événements") event = 
+    f"{datetime.datetime.now()}: Pilulier {status}" events.append(event) 
+    print(event) return jsonify({"success": True}) return """ <h1>Moniteur de 
+    Pilulier</h1>if __name__ == '__main__': app.run(host='0.0.0.0', port=8000, 
+    debug=True) <p>Statut: En ligne ✅</p> <p>Derniers événements:</p> <ul> """ 
+    + "".join([f"<li>{e}</li>" for e in events[-5:]]) + """ </ul> <p>Debug: """ 
+    + str(len(events)) + """ événements total</p> """
+@app.route('/webhook/pillbox', methods=['POST', 'GET']) def pillbox_webhook(): 
+    print(f"\n[DEBUG] Webhook reçu!") print(f"[DEBUG] Méthode: 
+    {request.method}") print(f"[DEBUG] Headers: {dict(request.headers)}")
+    
+    if request.method == 'GET': return "Webhook actif! Utilisez POST pour 
+        envoyer des données."
+    
+    try: data = request.get_json(force=True) print(f"[DEBUG] Données reçues: 
+        {data}")
+    except: data = {"value": "erreur de parsing"} print(f"[DEBUG] Erreur parsing 
+        JSON")
+    
+    status = data.get('value', 'unknown') event = f"{datetime.datetime.now()}: 
+    Pilulier {status}" events.append(event) print(f"[DEBUG] Événement ajouté: 
+    {event}")
+    
+    return jsonify({"success": True, "message": f"Reçu: {status}"}) if __name__ 
+== '__main__':
+    print("[DEBUG] Démarrage de l'application...")
+    app.run(host='0.0.0.0', port=8000, debug=True)

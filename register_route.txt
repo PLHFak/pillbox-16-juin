@@ -1,0 +1,23 @@
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        nom_complet = request.form.get("nom_complet")
+        
+        # Verifier si utilisateur existe
+        if User.query.filter_by(username=username).first():
+            return "<h2>Erreur: Utilisateur existe deja!</h2><a href='/register'>Retour</a>"
+        
+        # Creer nouvel utilisateur
+        user = User(username=username, email=email, nom_complet=nom_complet)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        return redirect(url_for("login"))
+    
+    # Afficher formulaire
+    return render_template("register.html")

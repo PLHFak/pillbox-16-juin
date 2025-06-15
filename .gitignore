@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# Database
+*.db
+instance/*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Config locale
+.env
+config.local.py
+
+# Backups
+backup_*/
+*_backup*

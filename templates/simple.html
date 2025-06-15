@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>Pilulier</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .header { background: blue; color: white; padding: 20px; }
+        .box { background: #f0f0f0; padding: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Moniteur Pilulier</h1>
+        <p>Bonjour {{ user.username }} - <a href="/logout" style="color:white">Logout</a></p>
+    </div>
+    
+    <div class="box">
+        <h2>PILULIER {{ etat.upper() }}</h2>
+        <p>{{ nb_ouvertures }} ouvertures aujourd'hui</p>
+    </div>
+    
+    <h3>Evenements:</h3>
+    {% for event in events %}
+        <div class="box">
+            {{ event.timestamp.strftime('%H:%M') }} - {{ event.status }}
+        </div>
+    {% endfor %}
+    
+    <script>
+        setTimeout(function() { location.reload(); }, 30000);
+    </script>
+</body>
+</html>

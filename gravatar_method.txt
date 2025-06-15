@@ -1,0 +1,7 @@
+    
+    def get_avatar_url(self):
+        if self.photo_url and self.photo_url != '/static/default-avatar.png':
+            return self.photo_url
+        # Utiliser Gravatar
+        email_hash = hashlib.md5(self.email.lower().encode()).hexdigest()
+        return f"https://www.gravatar.com/avatar/{email_hash}?d=identicon&s=200"
