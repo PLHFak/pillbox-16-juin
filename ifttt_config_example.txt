@@ -1,0 +1,40 @@
+Ì†ΩÌ¥ß CONFIGURATION IFTTT POUR PILLBOX MONITOR
+==========================================
+
+1. APPLET POUR ADMIN (ID 1)
+---------------------------
+Trigger: eWeLink > Door Opens
+Action: Webhooks > Make a web request
+  - URL: http://VOTRE_IP:8001/webhook/simple/1/opened
+  - Method: POST
+  - Content Type: (laisser vide ou application/json)
+  - Body: (laisser vide)
+
+Trigger: eWeLink > Door Closes  
+Action: Webhooks > Make a web request
+  - URL: http://VOTRE_IP:8001/webhook/simple/1/closed
+  - Method: POST
+  - Content Type: (laisser vide ou application/json)
+  - Body: (laisser vide)
+
+2. APPLET POUR PATIENT 3
+------------------------
+Trigger: eWeLink > Door Opens
+Action: Webhooks > Make a web request
+  - URL: http://VOTRE_IP:8001/webhook/simple/3/opened
+  - Method: POST
+  - Content Type: (laisser vide ou application/json)
+  - Body: (laisser vide)
+
+Trigger: eWeLink > Door Closes
+Action: Webhooks > Make a web request  
+  - URL: http://VOTRE_IP:8001/webhook/simple/3/closed
+  - Method: POST
+  - Content Type: (laisser vide ou application/json)
+  - Body: (laisser vide)
+
+NOTES:
+- Remplacez VOTRE_IP par l'IP de votre serveur
+- Le port est 8001 pour l'app de test (8000 pour production)
+- Les param√®tres user_id et status sont dans l'URL
+- Pas besoin de body JSON complexe

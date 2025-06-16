@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user.nom_complet or user.username }} - Pillbox Monitor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+        }
+        
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header compact */
+        .header-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        /* État du pilulier compact */
+        .pillbox-state-compact {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .pillbox-state-compact.opened {
+            background: linear-gradient(135deg, #d4edda 0%, #a8e6cf 100%);
+        }
+        
+        .pillbox-state-compact.closed {
+            background: linear-gradient(135deg, #f8d7da 0%, #ffb3ba 100%);
+        }
+        
+        .state-icon-compact {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .pillbox-state-compact.opened .state-icon-compact {
+            color: #28a745;
+        }
+        
+        .pillbox-state-compact.closed .state-icon-compact {
+            color: #dc3545;
+        }
+        
+        /* Section des prises avec barres */
+        .prises-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            color: #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        /* Barre de progression pour les prises */
+        .daily-progress {
+            margin-bottom: 25px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress {
+            height: 35px;
+            border-radius: 20px;
+            background: #e9ecef;
+            overflow: visible;
+            position: relative;
+        }
+        
+        .progress-bar-container {
+            display: flex;
+            height: 100%;
+            position: relative;
+        }
+        
+        .prise-segment {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 2px solid white;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .prise-segment:last-child {
+            border-right: none;
+            border-radius: 0 20px 20px 0;
+        }
+        
+        .prise-segment:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+        
+        .prise-segment.taken {
+            background: #28a745;
+            color: white;
+        }
+        
+        .prise-segment.pending {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .prise-segment.missed {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .prise-segment:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .prise-time {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .prise-icon {
+            font-size: 16px;
+            margin-right: 5px;
+        }
+        
+        /* Statistiques compactes */
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-mini {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-mini-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .stat-mini-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        /* Historique compact */
+        .history-compact {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        /* Boutons flottants */
+        .floating-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn-float {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-float:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header compact -->
+        <div class="header-section">
+            <h3><i class="fas fa-pills"></i> Moniteur de Pilulier</h3>
+        </div>
+        
+        <!-- Info utilisateur compact -->
+        <div class="user-info">
+            <img src="{{ user.get_avatar_url() }}" alt="Avatar" class="avatar-small">
+            <div>
+                <strong>{{ user.nom_complet or user.username }}</strong><br>
+                <small>{{ user.nb_prises_jour }} prise{{ 's' if user.nb_prises_jour > 1 else '' }}/jour</small>
+            </div>
+        </div>
+
+        <!-- État pilulier compact -->
+        <div class="pillbox-state-compact {{ etat }}">
+            <div class="state-icon-compact">
+                {% if etat == 'opened' %}
+                    <i class="fas fa-box-open"></i>
+                {% elif etat == 'closed' %}
+                    <i class="fas fa-box"></i>
+                {% else %}
+                    <i class="fas fa-question-circle"></i>
+                {% endif %}
+            </div>
+            <strong>
+                {% if etat == 'opened' %}OUVERT{% elif etat == 'closed' %}FERMÉ{% else %}INCONNU{% endif %}
+            </strong>
+        </div>
+
+        <!-- Section des prises avec barres -->
+        <div class="prises-section">
+            <h4 class="section-title">Prises du jour</h4>
+            
+            <div class="daily-progress">
+                <div class="progress-label">
+                    <span>Aujourd'hui</span>
+                    <span>{{ ouvertures_jour }}/{{ user.nb_prises_jour }}</span>
+                </div>
+                
+                <div class="progress">
+                    <div class="progress-bar-container">
+                        {% if user.nb_prises_jour == 1 %}
+                            <!-- Une seule prise -->
+                            <div class="prise-segment {% if ouvertures_jour >= 1 %}taken{% else %}pending{% endif %}">
+                                <i class="prise-icon fas fa-pills"></i>
+                                <span class="prise-time">Journée</span>
+                            </div>
+                        {% elif user.nb_prises_jour == 2 %}
+                            <!-- Deux prises -->
+                            <div class="prise-segment {% if ouvertures_jour >= 1 %}taken{% else %}pending{% endif %}">
+                                <i class="prise-icon fas fa-sun"></i>
+                                <span class="prise-time">Matin</span>
+                            </div>
+                            <div class="prise-segment {% if ouvertures_jour >= 2 %}taken{% elif ouvertures_jour >= 1 %}pending{% else %}missed{% endif %}">
+                                <i class="prise-icon fas fa-moon"></i>
+                                <span class="prise-time">Soir</span>
+                            </div>
+                        {% elif user.nb_prises_jour == 3 %}
+                            <!-- Trois prises -->
+                            <div class="prise-segment {% if ouvertures_jour >= 1 %}taken{% else %}pending{% endif %}">
+                                <i class="prise-icon fas fa-sun"></i>
+                                <span class="prise-time">Matin</span>
+                            </div>
+                            <div class="prise-segment {% if ouvertures_jour >= 2 %}taken{% elif ouvertures_jour >= 1 %}pending{% else %}missed{% endif %}">
+                                <i class="prise-icon fas fa-cloud-sun"></i>
+                                <span class="prise-time">Midi</span>
+                            </div>
+                            <div class="prise-segment {% if ouvertures_jour >= 3 %}taken{% elif ouvertures_jour >= 2 %}pending{% else %}missed{% endif %}">
+                                <i class="prise-icon fas fa-moon"></i>
+                                <span class="prise-time">Soir</span>
+                            </div>
+                        {% else %}
+                            <!-- Quatre prises ou plus -->
+                            {% for i in range(user.nb_prises_jour) %}
+                                <div class="prise-segment {% if ouvertures_jour > i %}taken{% elif ouvertures_jour == i %}pending{% else %}missed{% endif %}">
+                                    <span class="prise-time">{{ i + 1 }}</span>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats compactes -->
+        <div class="stats-row">
+            <div class="stat-mini">
+                <div class="stat-mini-value">
+                    {{ ((ouvertures_jour / user.nb_prises_jour * 100) if user.nb_prises_jour > 0 else 0) | int }}%
+                </div>
+                <div class="stat-mini-label">Aujourd'hui</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-value">
+                    {% if ouvertures_jour >= user.nb_prises_jour %}
+                        <i class="fas fa-check" style="color: #28a745;"></i>
+                    {% else %}
+                        <i class="fas fa-clock" style="color: #ffc107;"></i>
+                    {% endif %}
+                </div>
+                <div class="stat-mini-label">Statut</div>
+            </div>
+        </div>
+
+        <!-- Historique compact -->
+        <div class="history-compact">
+            <h6 class="mb-2">Dernières actions</h6>
+            {% if events %}
+                {% for event in events[:5] %}
+                    <div class="history-item-compact">
+                        <i class="fas fa-{{ 'box-open' if event.status == 'opened' else 'box' }}"></i>
+                        <span>{{ event.timestamp.strftime('%H:%M') }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center opacity-50">Aucun événement</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Boutons flottants -->
+    <div class="floating-buttons">
+        <a href="/profile" class="btn-float" title="Profil">
+            <i class="fas fa-user"></i>
+        </a>
+        <a href="/supervision" class="btn-float" title="Supervision">
+            <i class="fas fa-chart-line"></i>
+        </a>
+        <a href="/logout" class="btn-float" title="Déconnexion">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
+</body>
+</html>

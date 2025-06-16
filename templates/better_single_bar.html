@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user.nom_complet or user.username }} - Pillbox Monitor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+        }
+        
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Logo animé */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .pillbox-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Info utilisateur */
+        .user-info {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        /* Barre de prise unique */
+        .prise-bar-container {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .prise-bar {
+            background: #e9ecef;
+            border-radius: 30px;
+            height: 80px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        
+        .prise-bar.taken {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .prise-bar.not-taken {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+        
+        .prise-bar:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .prise-content {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .prise-icon {
+            font-size: 40px;
+            margin-right: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .prise-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .prise-status {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .prise-time {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* État du pilulier avec timing */
+        .pillbox-state-info {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .state-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        
+        .state-opened {
+            color: #28a745;
+        }
+        
+        .state-closed {
+            color: #dc3545;
+        }
+        
+        .duration-info {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        
+        .duration-time {
+            font-weight: bold;
+            font-size: 24px;
+            color: #ffc107;
+        }
+        
+        /* Stats du jour */
+        .daily-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        /* Historique simplifié */
+        .history-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        /* Boutons flottants */
+        .floating-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn-float {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-float:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Logo -->
+        <div class="logo-section">
+            <svg class="pillbox-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="pillGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="20" y="30" width="60" height="50" rx="10" fill="url(#pillGradient)" stroke="white" stroke-width="2"/>
+                <rect x="20" y="25" width="60" height="15" rx="8" fill="#8b9dc3" stroke="white" stroke-width="2"/>
+                <circle cx="27" cy="60" r="6" fill="#ff6b6b" opacity="0.9"/>
+                <circle cx="42" cy="58" r="6" fill="#4ecdc4" opacity="0.9"/>
+                <circle cx="57" cy="62" r="6" fill="#ffe66d" opacity="0.9"/>
+                <circle cx="72" cy="59" r="6" fill="#a8e6cf" opacity="0.9"/>
+            </svg>
+            <h3>Moniteur de Pilulier</h3>
+        </div>
+        
+        <!-- Info utilisateur -->
+        <div class="user-info">
+            <img src="{{ user.get_avatar_url() }}" alt="Avatar" class="avatar-small">
+            <div>
+                <strong>{{ user.nom_complet or user.username }}</strong><br>
+                <small>{{ user.nb_prises_jour }} prise{{ 's' if user.nb_prises_jour > 1 else '' }}/jour</small>
+            </div>
+        </div>
+
+        <!-- Barre de prise unique -->
+        <div class="prise-bar-container">
+            <h5 class="text-center text-dark mb-3">Prise de médicaments</h5>
+            
+            <div class="prise-bar {% if ouvertures_jour > 0 %}taken{% else %}not-taken{% endif %}">
+                <div class="prise-content">
+                    <div class="prise-icon">
+                        {% if ouvertures_jour > 0 %}
+                            <i class="fas fa-pills"></i>
+                        {% else %}
+                            <i class="fas fa-box"></i>
+                        {% endif %}
+                    </div>
+                    <div class="prise-text">
+                        <div class="prise-status">
+                            {% if ouvertures_jour > 0 %}
+                                PRISE EFFECTUÉE
+                            {% else %}
+                                NON PRISE
+                            {% endif %}
+                        </div>
+                        <div class="prise-time">
+                            {% if dernier_event and dernier_event.status == 'opened' %}
+                                Ouvert à {{ dernier_event.timestamp.strftime('%H:%M') }}
+                            {% elif ouvertures_jour > 0 %}
+                                {{ ouvertures_jour }}/{{ user.nb_prises_jour }} aujourd'hui
+                            {% else %}
+                                En attente
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- État actuel avec durée -->
+        <div class="pillbox-state-info">
+            <div class="state-icon {% if etat == 'opened' %}state-opened{% else %}state-closed{% endif %}">
+                {% if etat == 'opened' %}
+                    <i class="fas fa-box-open"></i>
+                {% else %}
+                    <i class="fas fa-box"></i>
+                {% endif %}
+            </div>
+            <div>
+                Pilulier {% if etat == 'opened' %}OUVERT{% else %}FERMÉ{% endif %}
+            </div>
+            {% if dernier_event %}
+                <div class="duration-info">
+                    Depuis <span class="duration-time" id="duration">--:--</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Stats du jour -->
+        <div class="daily-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ ouvertures_jour }}</div>
+                <div class="stat-label">Prises</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {{ ((ouvertures_jour / user.nb_prises_jour * 100) if user.nb_prises_jour > 0 else 0) | int }}%
+                </div>
+                <div class="stat-label">Complété</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {% if ouvertures_jour >= user.nb_prises_jour %}
+                        <i class="fas fa-check" style="color: #28a745;"></i>
+                    {% else %}
+                        {{ user.nb_prises_jour - ouvertures_jour }}
+                    {% endif %}
+                </div>
+                <div class="stat-label">
+                    {% if ouvertures_jour >= user.nb_prises_jour %}
+                        OK
+                    {% else %}
+                        Restant
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Historique -->
+        <div class="history-container">
+            <h5 class="mb-3"><i class="fas fa-history"></i> Historique</h5>
+            {% if events %}
+                {% for event in events[:5] %}
+                    <div class="history-item">
+                        <i class="fas fa-{{ 'box-open' if event.status == 'opened' else 'box' }} fa-lg"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ 'Ouvert' if event.status == 'opened' else 'Fermé' }}</strong><br>
+                            <small>{{ event.timestamp.strftime('%d/%m à %H:%M') }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center opacity-50">Aucun événement</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Boutons flottants -->
+    <div class="floating-buttons">
+        <a href="/profile" class="btn-float" title="Profil">
+            <i class="fas fa-user"></i>
+        </a>
+        <a href="/supervision" class="btn-float" title="Supervision">
+            <i class="fas fa-chart-line"></i>
+        </a>
+        <a href="/logout" class="btn-float" title="Déconnexion">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
+
+    <!-- Script pour calculer la durée -->
+    <script>
+    {% if dernier_event %}
+    function updateDuration() {
+        const eventTime = new Date("{{ dernier_event.timestamp.isoformat() }}");
+        const now = new Date();
+        const diff = Math.floor((now - eventTime) / 1000); // en secondes
+        
+        const minutes = Math.floor(diff / 60);
+        const seconds = diff % 60;
+        
+        document.getElementById('duration').textContent = 
+            minutes.toString().padStart(2, '0') + ':' + 
+            seconds.toString().padStart(2, '0');
+    }
+    
+    updateDuration();
+    setInterval(updateDuration, 1000);
+    {% endif %}
+    </script>
+</body>
+</html>
